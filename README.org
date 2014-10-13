@@ -1,0 +1,117 @@
+# -*- mode: org; mode: long-lines -*-
+#+TITLE:       Query the OpenstreetMap database using Python
+#+AUTHOR:      Morten Kjeldgaard
+#+EMAIL:       mok@bioxray.dk
+
+* A Python module for querying the OSM database
+
+Based on =OsmApi= by Etienne Chové.
+
+The [[http://wiki.openstreetmap.org/wiki/Overpass_API][Overpass API]]
+
+** Example
+
+#+begin_src python
+from osmxapi.xapiquery import XapiQuery
+from osmxapi import OsmXapi
+
+if __name__ == '__main__':
+
+    xapi = OsmXapi(debug = True)
+
+    unipark = XapiQuery (lats=56.1618032,
+                           lonw=10.1891327,
+                           latn=56.1719343,
+                           lone=10.212822)
+
+    unipark[u'amenity'] = u'parking'
+
+    N = xapi.nodeGet(uniparken)
+    print N
+
+    W = xapi.wayGet(uniparken)
+    print W
+
+    A = xapi.anyGet(uniparken)
+    print A
+#+end_src
+
+** Another example
+
+#+begin_src python
+from xapiquery import XapiQuery
+
+bb = XapiQuery ()
+bb.bbox(7.1,51.2,7.2,51.3)
+print bb
+
+wup = XapiQuery()
+wup['name'] = 'Wuppertal-Barmen'
+print wup
+
+halt = XapiQuery()
+halt['railway'] = 'halt'
+print wup+halt
+
+rail = XapiQuery (railway = '*')
+print wup+rail
+
+wupo = XapiQuery (name = 'Wuppertal-Barmen|Wuppertal-Oberbarmen')
+print wupo
+
+print bb
+
+bus = XapiQuery(highway="bus_stop")
+print bb + bus
+
+print bb+wup+halt
+
+bus = XapiQuery(highway="bus_stop|traffic_signals")
+print bb+bus
+
+print bb+XapiQuery(highway='*')
+
+fischer = XapiQuery(name="Fischertal")
+print fischer
+
+bridge=XapiQuery(bridge="yes")
+print fischer+bridge
+#+end_src
+
+
+** Example using raw mode
+
+We define a query to retrieve the relation describing the administrative
+boundary of Danmark.
+
+#+begin_src python
+denmark = XapiQuery(boundary="administrative")
+denmark['name'] = 'Danmark'
+denmark['admin_level'] = '2'
+#+end_src
+
+
+#+begin_src python
+from osmxapi import OsmXapi
+xapi = OsmXapi(api="overpass.osm.rambler.ru", base="cgi", debug = True)
+A = xapi.relationGet(denmark, raw=True)
+#+end_src
+
+# now set the meta tag
+
+#+begin_src python
+denmark['meta']=True
+print(denmark)
+B = xapi.relationGet(denmark, raw=True)
+print(B)
+print(A)
+#+end_src
+
+Compare the two requests A and B, see that the second includes metadata
+id, version, timestamp, changeset, uid and user.
+
+#+begin_example
+<   <relation id="50046">
+---
+>   <relation id="50046" version="82" timestamp="2011-12-23T17:14:24Z" changeset="10188268" uid="36080" user="polderrunner">
+#+end_example
